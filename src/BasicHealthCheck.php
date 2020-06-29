@@ -2,6 +2,8 @@
 
 namespace Enklare\Health;
 
+use Carbon\Carbon;
+
 class BasicHealthCheck implements \JsonSerializable {
 
     /**
@@ -10,14 +12,27 @@ class BasicHealthCheck implements \JsonSerializable {
     const FAIL = "fail";
     const WARN = "warn";
     const PASS = "pass";
-
+    
+    /**
+     * _executionStart timestamp
+     *
+     * @var int
+     */
+    private $_executionStart;
+    
+    /**
+     * _executionStop timestamp
+     *
+     * @var int
+     */
+    private $_executionStop;
 
     /**
      * status
      *
      * @var string Status constant
      */
-    protected $status;
+    protected $_status;
     /**
      * service
      *
@@ -33,7 +48,8 @@ class BasicHealthCheck implements \JsonSerializable {
      */
     public function failed()
     {
-        return $this->status = self::FAIL;
+        $this->measureStop();
+        return $this->_status = self::FAIL;
     }
 
     /**
@@ -44,7 +60,8 @@ class BasicHealthCheck implements \JsonSerializable {
      */
     public function warning()
     {
-        return $this->status = self::WARN;
+        $this->measureStop();
+        return $this->_status = self::WARN;
     }
 
     /**
@@ -55,7 +72,8 @@ class BasicHealthCheck implements \JsonSerializable {
      */
     public function passed()
     {
-        return $this->status = self::PASS;
+        $this->measureStop();
+        return $this->_status = self::PASS;
     }
 
     /**
@@ -63,8 +81,9 @@ class BasicHealthCheck implements \JsonSerializable {
      * get the current status of this subcheck
      * @return string
      */
-    public function status(){
-        return $this->status;
+    public function status()
+    {
+        return $this->_status;
     }
 
     /**
@@ -73,21 +92,90 @@ class BasicHealthCheck implements \JsonSerializable {
      * @param  mixed $service
      * @return void
      */
-    public function __construct(string $service)
+    public function __construct(string $service, $autostart = true)
     {
         $this->service = $service;
+        if($autostart) {
+            $this->measureStart();
+        }
     }
 
     /**
-     * jsonSerialize
+     * start execution time measurement
+     *
+     * @return void
+     * @OA\Property()
+     **/
+    public function measureStart()
+    {
+        $this->_executionStart = new Carbon();
+    }
+
+    /**
+     * stop execution time measurement
+     *
+     * @return void
+     * @OA\Property()
+     **/
+    public function measureStop()
+    {
+        $this->_executionStop = new Carbon();
+    }
+
+    /**
+     * get check time measurement in milliseconds
+     *
+     * @return int
+     * @OA\Property()
+     **/
+    public function executionTimeMs()
+    {
+        if($this->_executionStart && $this->_executionStop) {
+            return round($this->_executionStart->diffInMilliseconds($this->_executionStop));
+        }
+        return null;
+    }
+
+    /**
+     * Get check time measurement starttime as Carbon instance
+     *
+     * @return Carbon
+     * @OA\Property()
+     **/
+    public function executionStartTime()
+    {
+        return $this->_executionStart ?: null;
+    }
+
+    /**
+     * Get check time measurement starttime as Carbon instance
+     *
+     * @return Carbon
+     * @OA\Property()
+     **/
+    public function executionStopTime()
+    {
+        return $this->_executionStop ?: null;
+    }
+    
+
+    
+
+    /**
+     * JSON serialization method (native serialize support)
+     * 
      * Returns a serializable object from this instance
-     * @return mixed
-     */
+     * 
+     * @return array
+     **/
     public function jsonSerialize()
     {
         return [
-            'status'  => $this->status,
-            'service' => $this->service
+            'status'  => $this->_status,
+            'service' => $this->service,
+            'executionTimeMs' => $this->executionTimeMs(),
+            'executionStartTime' => $this->executionStartTime(),
+            'executionStopTime' => $this->executionStopTime(),
         ];
     }
 }

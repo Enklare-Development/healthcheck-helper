@@ -1,29 +1,32 @@
 <?php
 
-
 namespace Enklare\Health;
 
-class HealthCheck extends BasicHealthCheck implements \JsonSerializable {
+class HealthCheck extends BasicHealthCheck implements \JsonSerializable
+{
 
     /**
-     * version
-     * system version we're checking
+     * System version we're checking
+     * 
      * @var mixed
+     * @OA\Property()
      */
     public $version;
 
     /**
-     * checks
-     * array of BasicHealthCheck objects, subchecks for the current check
+     * Array of BasicHealthCheck objects, subchecks for the current check
+     * 
      * @var array
+     * @OA\Property()
      */
-    public $checks = [];
+    private $_checks = [];
     
     /**
      * __construct
      *
-     * @param  mixed $service Service name to display in healthcheck
-     * @param  mixed $version Service version to display in healthckeck
+     * @param mixed $service Service name to display in healthcheck
+     * @param mixed $version Service version to display in healthckeck
+     * 
      * @return void
      */
     public function __construct(string $service, string $version = "0")
@@ -31,42 +34,68 @@ class HealthCheck extends BasicHealthCheck implements \JsonSerializable {
         parent::__construct($service);
         $this->version = $version;
     }
-
-    public function any(string $status)
+    
+    /**
+     * Find out if any subcheck matches this status
+     *
+     * @param string $status The status to match against
+     * 
+     * @return boolean
+     */
+    private function _anyCheckMatchesStatus(string $status): bool
     {
-        foreach($this->checks as $c){
-            if($c->status == $status) {
+        foreach ($this->_checks as $c) {
+            if ($c->status() == $status) {
                 return true;
             }
         }
 
         return false;
     }
-
-    public function addCheck(BasicHealthCheck $check)
+    
+    /**
+     * Add a subcheck for this service
+     *
+     * @param BasicHealthCHeck $check
+     * 
+     * @return void
+     */
+    public function addCheck(BasicHealthCheck $check): void
     {
-        $this->checks[] = $check;
+        $this->_checks[] = $check;
 
         // re-evaluate self status
         $this->evaluate();
     }
-
-    public function evaluate()
+    
+    /**
+     * Evaluates this tests health by checking if any subchecks failed
+     *
+     * @return void
+     */
+    public function evaluate(): void
     {
-        if($this->any(self::WARN)) {
+        if ($this->_anyCheckMatchesStatus(self::WARN)) {
             $this->warning();
         }
-        if($this->any(self::FAIL)) {
+        if ($this->_anyCheckMatchesStatus(self::FAIL)) {
             $this->failed();
         }
     }
-
+    
+    /**
+     * JSON serialization method (native serialize support)
+     *
+     * Returns a serializable object from this instance
+     *
+     * @return array
+     **/
     public function jsonSerialize()
     {
         $item = parent::jsonSerialize();
         $item['version'] = $this->version;
 
-        foreach($this->checks as $c) {
+        foreach ($this->_checks as $c) {
             $item['checks'][$c->service] = $c->jsonSerialize();
         }
 
