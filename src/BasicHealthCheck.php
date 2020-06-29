@@ -49,7 +49,8 @@ class BasicHealthCheck implements \JsonSerializable {
     public function failed()
     {
         $this->measureStop();
-        return $this->_status = self::FAIL;
+        $this->_status = self::FAIL;
+        return $this;
     }
 
     /**
@@ -61,7 +62,8 @@ class BasicHealthCheck implements \JsonSerializable {
     public function warning()
     {
         $this->measureStop();
-        return $this->_status = self::WARN;
+        $this->_status = self::WARN;
+        return $this;
     }
 
     /**
@@ -73,7 +75,8 @@ class BasicHealthCheck implements \JsonSerializable {
     public function passed()
     {
         $this->measureStop();
-        return $this->_status = self::PASS;
+        $this->_status = self::PASS;
+        return $this;
     }
 
     /**

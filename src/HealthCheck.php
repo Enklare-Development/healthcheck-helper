@@ -33,6 +33,9 @@ class HealthCheck extends BasicHealthCheck implements \JsonSerializable
     {
         parent::__construct($service);
         $this->version = $version;
+
+        // Default to passed state if no sub-checks are ever done
+        $this->passed();
     }
     
     /**

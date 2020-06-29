@@ -20,6 +20,8 @@ class HealthCheckTest extends TestCase
         $this->assertEquals($service_name, $check->service);
         $this->assertEquals($service_version, $check->version);
 
+        $this->assertEquals(HealthCheck::PASS, $check->status(), 'Check does not pass when no action was taken');
+
         $check->passed();
 
         $this->assertEquals(HealthCheck::PASS, $check->status(), 'Check does not pass when being set to passed');
