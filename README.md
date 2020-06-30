@@ -1,14 +1,15 @@
 # Readme
 A simple class utility to help creating uniform healthchecks with sub-system checks if necessary
 
+# Installation
+`composer require enklare-development/healthcheck-helper`
+
 # Using
-`composer require enkalre-development/healthcheck-helper`
+
 Laravel usage example
 ```
 <?php
-
 namespace App\Http\Controllers;
-
 use \Enklare\Health\HealthCheck;
 use \Enklare\Health\BasicHealthCheck;
 
