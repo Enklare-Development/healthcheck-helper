@@ -5,8 +5,7 @@
     "keywords": ["healthcheck", "enklare"],
     "homepage": "https://www.enklare.se",
     "license": "MIT",
-    "authors": [
-        {
+    "authors": [{
             "name": "Pierre Wahlberg",
             "email": "pierre.vahlberg@enklare.se",
             "homepage": "https://www.enklare.se",
@@ -30,7 +29,7 @@
         "source": "https://github.com/enklare-development/healthcheck-helper"
     },
     "require": {
-        "php": "^7.2",
+        "php": "^7.2|^8.0",
         "nesbot/carbon": "^2.35"
     },
     "require-dev": {
